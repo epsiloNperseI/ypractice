@@ -1,4 +1,4 @@
-package ypractice;
+package ypractice.recursion;
 
 import java.util.HashMap;
 import java.util.Map;

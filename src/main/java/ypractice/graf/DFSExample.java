@@ -1,4 +1,4 @@
-package ypractice;
+package ypractice.graf;
 
 import java.util.HashMap;
 import java.util.HashSet;

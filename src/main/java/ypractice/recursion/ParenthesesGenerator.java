@@ -1,4 +1,4 @@
-package ypractice;
+package ypractice.recursion;
 
 public class ParenthesesGenerator {
 
