@@ -10,6 +10,6 @@ public class RecursionBasics {
     }
 
     public static void main(String[] args) {
-        System.out.println("5! = " + factorial(5)); // 120
+        System.out.println("5! = " + factorial(5));
     }
 }
