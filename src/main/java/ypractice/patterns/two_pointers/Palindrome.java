@@ -1,4 +1,4 @@
-package ypractice.patterns;
+package ypractice.patterns.two_pointers;
 
 public class Palindrome {
 
