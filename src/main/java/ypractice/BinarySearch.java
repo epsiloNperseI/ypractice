@@ -2,14 +2,14 @@ package ypractice;
 
 public class BinarySearch {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         int[] nonNegativeArr = {1, 2, 3, 8, 10, 33, 333, 345, 346, 500};
         System.out.println(binarySearch(nonNegativeArr, 333));
     }
 
     public static boolean binarySearch(int[] arr, int X) {
         int left = 0;
-        int right = arr.length; // правая граница НЕ включена
+        int right = arr.length;
 
         while (left < right) {
             int mid = (left + right) / 2;
@@ -17,9 +17,9 @@ public class BinarySearch {
             if (arr[mid] == X) {
                 return true;
             } else if (arr[mid] < X) {
-                left = mid + 1;  // ищем справа
+                left = mid + 1;
             } else {
-                right = mid;     // ищем слева
+                right = mid;
             }
         }
 
