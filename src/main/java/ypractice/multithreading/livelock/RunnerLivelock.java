@@ -1,5 +1,4 @@
-package ypractice.multithreading.deadlock;
-
+package ypractice.multithreading.livelock;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -8,35 +7,24 @@ import static java.lang.System.out;
 import static java.lang.Thread.currentThread;
 
 /**
- * Демонстрация Deadlock на примере двух потоков.
+ * Демонстрация Livelock на примере двух потоков,
+ * которые вежливо уступают друг другу и никак не могут продвинуться.
  *
- * <p>Источник: Java. Многопоточность. Урок 31. Deadlock + пример.
- * <a href="https://www.youtube.com/watch?v=NCaxM5V79PM&list=PLqnlz-HutZiRA06Y-LdunLtHN7XwBZgNG&index=30">YouTube</a>
+ * <p>Источник: Java. Многопоточность. Урок 31. Livelock + пример.
+ * <a href="https://www.youtube.com/watch?v=UX2R3BT9Sec&list=PLqnlz-HutZiRA06Y-LdunLtHN7XwBZgNG&index=31">YouTube</a>
  */
-public final class RunnerDeadlock {
+public final class RunnerLivelock {
 
     static void main(final String... args) {
         final Lock firstGivenLock = new ReentrantLock();
         final Lock secondGivenLock = new ReentrantLock();
 
         final Thread firstGivenThread = new Thread(
-            new Task(
-                firstGivenLock,
-                "firstGivenLock",
-                secondGivenLock,
-                "secondGivenLock"
-            )
+            new Task(firstGivenLock, "firstGivenLock", secondGivenLock, "secondGivenLock")
         );
         final Thread secondGivenThread = new Thread(
-            new Task(
-                secondGivenLock,
-                "secondGivenLock",
-                firstGivenLock,
-                "firstGivenLock"
-            )
+            new Task(secondGivenLock, "secondGivenLock", firstGivenLock, "firstGivenLock")
         );
-        // для предотвращения дедлока потоки программы должны захватывать замки/мониторы
-        //в одном и том же порядке. Для фикса нужно в 17 строке поменять местами secondGivenLock и firstGivenLock.
 
         firstGivenThread.start();
         secondGivenThread.start();
@@ -52,8 +40,8 @@ public final class RunnerDeadlock {
             "Thread '%s' released lock '%s'%n";
 
         private final Lock firstLock;
-        private final Lock secondLock;
         private final String firstLockName;
+        private final Lock secondLock;
         private final String secondLockName;
 
         public Task(final Lock firstLock, final String firstLockName,
@@ -62,7 +50,6 @@ public final class RunnerDeadlock {
             this.firstLockName = firstLockName;
             this.secondLock = secondLock;
             this.secondLockName = secondLockName;
-
         }
 
         @Override
@@ -73,22 +60,37 @@ public final class RunnerDeadlock {
             this.firstLock.lock();
             try {
                 out.printf(MESSAGE_TEMPLATE_SUCCESS_ACQUIRE_LOCK, currentThreadName, firstLockName);
-                TimeUnit.MILLISECONDS.sleep(200);
+                TimeUnit.MILLISECONDS.sleep(50);
 
-                out.printf(MESSAGE_TEMPLATE_TRY_ACQUIRE_LOCK, currentThreadName, secondLockName);
-                this.secondLock.lock();
+                while (!this.tryAcquireSecondLock(currentThreadName)) {
+                    TimeUnit.MILLISECONDS.sleep(50);
+                    this.firstLock.unlock();
+                    out.printf(MESSAGE_TEMPLATE_RELEASE_LOCK, currentThreadName, firstLockName);
+                    TimeUnit.MILLISECONDS.sleep(50);
+                    out.printf(MESSAGE_TEMPLATE_TRY_ACQUIRE_LOCK, currentThreadName, firstLockName);
+                    this.firstLock.lock();
+                    out.printf(MESSAGE_TEMPLATE_SUCCESS_ACQUIRE_LOCK, currentThreadName, firstLockName);
+                    TimeUnit.MILLISECONDS.sleep(50);
+                }
+
                 try {
                     out.printf(MESSAGE_TEMPLATE_SUCCESS_ACQUIRE_LOCK, currentThreadName, secondLockName);
                 } finally {
                     this.secondLock.unlock();
                     out.printf(MESSAGE_TEMPLATE_RELEASE_LOCK, currentThreadName, secondLockName);
                 }
+
             } catch (final InterruptedException interruptedException) {
                 Thread.currentThread().interrupt();
             } finally {
                 this.firstLock.unlock();
                 out.printf(MESSAGE_TEMPLATE_RELEASE_LOCK, currentThreadName, firstLockName);
             }
+        }
+
+        private boolean tryAcquireSecondLock(final String currentThreadName) {
+            out.printf(MESSAGE_TEMPLATE_TRY_ACQUIRE_LOCK, currentThreadName, secondLockName);
+            return this.secondLock.tryLock();
         }
     }
 }
