@@ -3,9 +3,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.lang.System.out;
-import static java.lang.Thread.currentThread;
-
 /**
  * Демонстрация Livelock на примере двух потоков,
  * которые вежливо уступают друг другу и никак не могут продвинуться.
@@ -54,42 +51,42 @@ public final class RunnerLivelock {
 
         @Override
         public void run() {
-            final String currentThreadName = currentThread().getName();
+            final String currentThreadName =Thread.currentThread().getName();
 
-            out.printf(MESSAGE_TEMPLATE_TRY_ACQUIRE_LOCK, currentThreadName, firstLockName);
+            System.out.printf(MESSAGE_TEMPLATE_TRY_ACQUIRE_LOCK, currentThreadName, firstLockName);
             this.firstLock.lock();
             try {
-                out.printf(MESSAGE_TEMPLATE_SUCCESS_ACQUIRE_LOCK, currentThreadName, firstLockName);
+                System.out.printf(MESSAGE_TEMPLATE_SUCCESS_ACQUIRE_LOCK, currentThreadName, firstLockName);
                 TimeUnit.MILLISECONDS.sleep(50);
 
                 while (!this.tryAcquireSecondLock(currentThreadName)) {
                     TimeUnit.MILLISECONDS.sleep(50);
                     this.firstLock.unlock();
-                    out.printf(MESSAGE_TEMPLATE_RELEASE_LOCK, currentThreadName, firstLockName);
+                    System.out.printf(MESSAGE_TEMPLATE_RELEASE_LOCK, currentThreadName, firstLockName);
                     TimeUnit.MILLISECONDS.sleep(50);
-                    out.printf(MESSAGE_TEMPLATE_TRY_ACQUIRE_LOCK, currentThreadName, firstLockName);
+                    System.out.printf(MESSAGE_TEMPLATE_TRY_ACQUIRE_LOCK, currentThreadName, firstLockName);
                     this.firstLock.lock();
-                    out.printf(MESSAGE_TEMPLATE_SUCCESS_ACQUIRE_LOCK, currentThreadName, firstLockName);
+                    System.out.printf(MESSAGE_TEMPLATE_SUCCESS_ACQUIRE_LOCK, currentThreadName, firstLockName);
                     TimeUnit.MILLISECONDS.sleep(50);
                 }
 
                 try {
-                    out.printf(MESSAGE_TEMPLATE_SUCCESS_ACQUIRE_LOCK, currentThreadName, secondLockName);
+                    System.out.printf(MESSAGE_TEMPLATE_SUCCESS_ACQUIRE_LOCK, currentThreadName, secondLockName);
                 } finally {
                     this.secondLock.unlock();
-                    out.printf(MESSAGE_TEMPLATE_RELEASE_LOCK, currentThreadName, secondLockName);
+                    System.out.printf(MESSAGE_TEMPLATE_RELEASE_LOCK, currentThreadName, secondLockName);
                 }
 
             } catch (final InterruptedException interruptedException) {
                 Thread.currentThread().interrupt();
             } finally {
                 this.firstLock.unlock();
-                out.printf(MESSAGE_TEMPLATE_RELEASE_LOCK, currentThreadName, firstLockName);
+                System.out.printf(MESSAGE_TEMPLATE_RELEASE_LOCK, currentThreadName, firstLockName);
             }
         }
 
         private boolean tryAcquireSecondLock(final String currentThreadName) {
-            out.printf(MESSAGE_TEMPLATE_TRY_ACQUIRE_LOCK, currentThreadName, secondLockName);
+            System.out.printf(MESSAGE_TEMPLATE_TRY_ACQUIRE_LOCK, currentThreadName, secondLockName);
             return this.secondLock.tryLock();
         }
     }
